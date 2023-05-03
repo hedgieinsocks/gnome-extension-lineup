@@ -4,8 +4,6 @@
 const {Adw, Gio, Gtk} = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 
-const styles = ['wide', 'narrow'];
-
 
 function init() {
 }
@@ -19,26 +17,34 @@ function fillPreferencesWindow(window) {
     page.add(group);
 
     const row = new Adw.ActionRow({
-        title: 'Indicator Style',
+        title: 'Indicator Width',
         subtitle: 'Custom wide (>50) indicators are not affected',
     });
     group.add(row);
 
-    const dropdown = new Gtk.DropDown({
+    const adjustment = new Gtk.Adjustment({
+        value: settings.get_int('indicator-width'),
+        lower: 40,
+        upper: 50,
+        step_increment: 1,
+    });
+
+    const spinButton = new Gtk.SpinButton({
+        adjustment,
+        numeric: true,
         valign: Gtk.Align.CENTER,
-        model: Gtk.StringList.new(styles),
-        selected: settings.get_string('indicator-style'),
+        halign: Gtk.Align.END,
     });
 
     settings.bind(
-        'indicator-style',
-        dropdown,
-        'selected',
+        'indicator-width',
+        spinButton.get_adjustment(),
+        'value',
         Gio.SettingsBindFlags.DEFAULT
     );
 
-    row.add_suffix(dropdown);
-    row.activatable_widget = dropdown;
+    row.add_suffix(spinButton);
+    row.activatable_widget = spinButton;
 
     window.add(page);
 }
