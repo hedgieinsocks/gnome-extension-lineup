@@ -22,13 +22,20 @@ class Extension {
         // 40 - standard panel button
         // 50 - standard status indicator
         // 51 - language switch
-        // 58 - espresso, removable drive ...
+        // 58 - espresso, drive-menu ...
         // the rest are usually not icons so we skip them
         if (actorWidth <= 51 || actorWidth == 58) {
-            actor.get_first_child().width = desiredWidth;
-            actor.get_first_child().get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
+            let realActor = actor.get_first_child();
+            // workaround to fix shrinking of some icons when downsizing e.g. espresso, drive-menu ...
+            if (realActor.get_first_child().get_style_class_name() == 'system-status-icon') {
+                realActor.get_first_child().remove_style_class_name('system-status-icon');
+                realActor.get_first_child().add_style_class_name('popup-menu-icon');
+            }
+            realActor.width = desiredWidth;
+            realActor.get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
         }
     }
+
 
     _processAllActors() {
         this._actors = Main.panel._rightBox.get_children();
