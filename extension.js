@@ -13,6 +13,8 @@ class Extension {
 
 
     _processActor(actor) {
+        // skip combined quick settings indicator
+        if (actor.get_first_child().accessible_name == 'System') { return };
         let desiredWidth = this._settings.get_int('indicator-width');
         let actorWidth = actor.width;
 
@@ -22,11 +24,7 @@ class Extension {
                 actor.get_first_child().get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
             }
         } else {
-            /*
-                we don't want to break custom wide indicators
-                so we resize only standard ones that have width 50
-                + 51 is the width of the language switch
-            */
+            // resize only standard indicators that have width 50 + language switch that has width 51
             if (actorWidth <= 51) {
                 actor.get_first_child().width = desiredWidth;
             }
