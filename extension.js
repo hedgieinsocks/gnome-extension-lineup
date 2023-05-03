@@ -15,19 +15,18 @@ class Extension {
     _processActor(actor) {
         // skip combined quick settings indicator
         if (actor.get_first_child().accessible_name == 'System') { return };
+
         let desiredWidth = this._settings.get_int('indicator-width');
         let actorWidth = actor.width;
 
-        if (desiredWidth == 50) {
-            if (actorWidth < desiredWidth) {
-                actor.get_first_child().min_width = desiredWidth;
-                actor.get_first_child().get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
-            }
-        } else {
-            // resize only standard indicators that have width 50 + language switch that has width 51
-            if (actorWidth <= 51) {
-                actor.get_first_child().width = desiredWidth;
-            }
+        // 40 - standard panel button
+        // 50 - standard status indicator
+        // 51 - language switch
+        // 58 - espresso, removable drive ...
+        // the rest are usually not icons so we skip them
+        if (actorWidth <= 51 || actorWidth == 58) {
+            actor.get_first_child().width = desiredWidth;
+            actor.get_first_child().get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
         }
     }
 
@@ -39,10 +38,11 @@ class Extension {
 
     enable() {
         this._settings = ExtensionUtils.getSettings();
+
         this._processAllActors();
 
         this._actorsAddId = Main.panel._rightBox.connect('actor-added', (_, actor) => {
-                this._processActor(actor);
+            this._processActor(actor);
         });
 
         this._actorsChangeId = this._settings.connect('changed::indicator-width', () => {

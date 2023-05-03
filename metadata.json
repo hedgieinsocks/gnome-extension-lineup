@@ -2,7 +2,7 @@
     "uuid": "lineup@hedgie.tech",
     "name": "Lineup",
     "description": "Force right-side Panel Indicators to have the same width to ensure consistent spacing",
-    "version": 3,
+    "version": 4,
     "shell-version": [ "43", "44" ],
     "settings-schema": "org.gnome.shell.extensions.lineup",
     "url": "https://github.com/hedgieinsocks/lineup"
