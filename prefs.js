@@ -18,14 +18,14 @@ function fillPreferencesWindow(window) {
 
     const row = new Adw.ActionRow({
         title: 'Indicator Width',
-        subtitle: 'Custom wide (>50) indicators are not affected',
+        subtitle: 'Custom wide (>60px) indicators are not affected',
     });
     group.add(row);
 
     const adjustment = new Gtk.Adjustment({
         value: settings.get_int('indicator-width'),
         lower: 40,
-        upper: 50,
+        upper: 51,
         step_increment: 1,
     });
 

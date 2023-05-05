@@ -23,8 +23,9 @@ class Extension {
         // 50 - standard status indicator
         // 51 - language switch
         // 58 - espresso, drive-menu ...
-        // the rest are usually not icons so we skip them
-        if (actorWidth >= 40 && actorWidth <= 51 || actorWidth == 58) {
+        // 59 - custom-vpn-toggler ...
+        // the rest are usually not simple icons so we skip them
+        if (actorWidth >= 40 && actorWidth <= 60) {
             let realActor = actor.get_first_child();
             // workaround to fix shrinking of some icons when downsizing e.g. espresso, drive-menu ...
             if (realActor.get_first_child().get_style_class_name() == 'system-status-icon') {
