@@ -17,15 +17,12 @@ class Extension {
         if (actor.get_first_child().accessible_name == 'System') { return };
 
         let desiredWidth = this._settings.get_int('indicator-width');
+        let minWidth = this._settings.get_int('min-width');
+        let maxWidth = this._settings.get_int('max-width');
         let actorWidth = actor.width;
 
-        // 40 - standard panel button
-        // 50 - standard status indicator
-        // 51 - language switch
-        // 58 - espresso, drive-menu ...
-        // 59 - custom-vpn-toggler ...
-        // the rest are usually not simple icons so we skip them
-        if (actorWidth >= 40 && actorWidth <= 60) {
+
+        if (actorWidth >= minWidth && actorWidth <= maxWidth) {
             let realActor = actor.get_first_child();
             // workaround to fix shrinking of some icons when downsizing e.g. espresso, drive-menu ...
             if (realActor.get_first_child().get_style_class_name() == 'system-status-icon') {
@@ -53,7 +50,7 @@ class Extension {
             this._processActor(actor);
         });
 
-        this._actorsChangeId = this._settings.connect('changed::indicator-width', () => {
+        this._actorsChangeId = this._settings.connect('changed', () => {
             this._processAllActors();
         });
     }

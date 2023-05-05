@@ -4,5 +4,11 @@
     <key name="indicator-width" type="i">
       <default>50</default>
     </key>
+    <key name="min-width" type="i">
+      <default>40</default>
+    </key>
+    <key name="max-width" type="i">
+      <default>60</default>
+    </key>
   </schema>
 </schemalist>
