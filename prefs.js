@@ -13,15 +13,19 @@ function fillPreferencesWindow(window) {
     const settings = ExtensionUtils.getSettings();
 
     const page = new Adw.PreferencesPage();
-    const group = new Adw.PreferencesGroup();
-    page.add(group);
+    const groupMain = new Adw.PreferencesGroup();
+    const groupTarget = new Adw.PreferencesGroup({title: 'Target Group', description: 'Choose which indicators to resize'});
+    const groupTweak = new Adw.PreferencesGroup({title: 'Advanced Tweaks', description: 'Fine-tuning for advanced users'});
+    page.add(groupMain);
+    page.add(groupTarget);
+    page.add(groupTweak);
 
     // Indicator Width
     const rowWidth = new Adw.ActionRow({
         title: 'Indicator Width',
-        subtitle: 'Select desired indicator width',
+        subtitle: 'Select desired width for panel indicators',
     });
-    group.add(rowWidth);
+    groupMain.add(rowWidth);
 
     const widthAdjustment = new Gtk.Adjustment({
         value: settings.get_int('indicator-width'),
@@ -50,9 +54,8 @@ function fillPreferencesWindow(window) {
     // Min Width
     const rowMinWidth = new Adw.ActionRow({
         title: 'Minimal Width',
-        subtitle: 'Smaller indicators will not be resized',
     });
-    group.add(rowMinWidth);
+    groupTarget.add(rowMinWidth);
 
     const widthMinAdjustment = new Gtk.Adjustment({
         value: settings.get_int('min-width'),
@@ -81,9 +84,8 @@ function fillPreferencesWindow(window) {
     // Max Width
     const rowMaxWidth = new Adw.ActionRow({
         title: 'Maximal Width',
-        subtitle: 'Bigger indicators will not be resized',
     });
-    group.add(rowMaxWidth);
+    groupTarget.add(rowMaxWidth);
 
     const widthMaxAdjustment = new Gtk.Adjustment({
         value: settings.get_int('max-width'),
@@ -107,7 +109,62 @@ function fillPreferencesWindow(window) {
     );
 
     rowMaxWidth.add_suffix(widthMaxSpinButton);
-    rowMaxWidth.activatable_widget = widthMaxSpinButton
+    rowMaxWidth.activatable_widget = widthMaxSpinButton;
+
+    // Exclude
+    const rowExclude = new Adw.ActionRow({
+        title: 'Exclude',
+        subtitle: 'Skip indicators whose names contain these keywords',
+    });
+    groupTweak.add(rowExclude);
+
+    const excludeEntry = new Gtk.Entry({
+        placeholder_text: 'keyboard clipboard',
+        text: settings.get_string('exclude-words'),
+        valign: Gtk.Align.CENTER,
+        hexpand: true,
+    });
+
+    settings.bind(
+        'exclude-words',
+        excludeEntry,
+        'text',
+        Gio.SettingsBindFlags.DEFAULT
+    );
+
+    rowExclude.add_suffix(excludeEntry);
+    rowExclude.activatable_widget = excludeEntry;
+
+    // Resize Delay
+    const rowDelay = new Adw.ActionRow({
+        title: 'Delay',
+        subtitle: 'Increase if some indicators glitch or refuse to follow the rules',
+    });
+    groupTweak.add(rowDelay);
+
+    const delayAdjustment = new Gtk.Adjustment({
+        value: settings.get_int('delay-sec'),
+        lower: 0,
+        upper: 5,
+        step_increment: 1,
+    });
+
+    const delaySpinButton = new Gtk.SpinButton({
+        adjustment: delayAdjustment,
+        numeric: true,
+        valign: Gtk.Align.CENTER,
+        halign: Gtk.Align.END,
+    });
+
+    settings.bind(
+        'delay-sec',
+        delaySpinButton.get_adjustment(),
+        'value',
+        Gio.SettingsBindFlags.DEFAULT
+    );
+
+    rowDelay.add_suffix(delaySpinButton);
+    rowDelay.activatable_widget = delaySpinButton;
 
     window.add(page);
 }

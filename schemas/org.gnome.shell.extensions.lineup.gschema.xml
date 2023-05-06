@@ -10,5 +10,11 @@
     <key name="max-width" type="i">
       <default>60</default>
     </key>
+    <key name="exclude-words" type="s">
+      <default>""</default>
+    </key>
+    <key name="delay-sec" type="i">
+      <default>1</default>
+    </key>
   </schema>
 </schemalist>
