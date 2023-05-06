@@ -15,12 +15,13 @@ class Extension {
         this._actors = null;
         this._actorsAddId = null;
         this._actorsChangeId = null;
+        this._timeoutId = [];
     }
 
 
     _processActor(actor, sec) {
         let delaySec = sec || this._settings.get_int('delay-sec') * 1000;
-        setTimeout(() => {
+        let timeoutId = setTimeout(() => {
             let excludedWords = this._settings.get_string('exclude-words').toLowerCase() || QUICK_SETTINGS_NAME;
             let actorName = actor.get_first_child().get_accessible_name().toLowerCase() || PLACEHOLDER_NAME;
             let actorObjectName = actor.get_first_child().toString().toLowerCase();
@@ -49,6 +50,7 @@ class Extension {
                 realActor.get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
             }
         }, delaySec);
+        this._timeoutId.push(timeoutId);
     }
 
 
@@ -62,12 +64,13 @@ class Extension {
         this._settings = ExtensionUtils.getSettings();
 
         let delaySec = this._settings.get_int('delay-sec') * 1000;
-        setTimeout(() => {
+        let timeoutId = setTimeout(() => {
             this._processAllActors();
             this._actorsAddId = Main.panel._rightBox.connect('actor-added', (_, actor) => {
                 this._processActor(actor, null);
             });
         }, delaySec);
+        this._timeoutId.push(timeoutId);
 
         this._actorsChangeId = this._settings.connect('changed', () => {
             this._processAllActors();
@@ -80,6 +83,10 @@ class Extension {
         this._settings.disconnect(this._actorsChangeId);
         this._actorsAddId = null;
         this._actorsChangeId = null;
+        this._timeoutId.forEach((timeoutId) => {
+            clearTimeout(timeoutId);
+        });
+        this._timeoutId = [];
         this._actors = null;
     }
 }
