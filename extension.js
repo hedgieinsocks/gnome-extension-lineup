@@ -16,15 +16,15 @@ export default class LineupExtension extends Extension {
     }
 
     _processActor(actor, sec) {
-        let delaySec = sec || this._settings.get_int("delay-sec") * 1000;
-        let timeoutId = setTimeout(() => {
-            let excludedWords =
+        const delaySec = sec || this._settings.get_int("delay-sec") * 1000;
+        const timeoutId = setTimeout(() => {
+            const excludedWords =
                 this._settings.get_string("exclude-words").toLowerCase() ||
                 QUICK_SETTINGS_NAME;
-            let actorName =
+            const actorName =
                 actor.get_first_child().get_accessible_name().toLowerCase() ||
                 PLACEHOLDER_NAME;
-            let actorObjectName = actor
+            const actorObjectName = actor
                 .get_first_child()
                 .toString()
                 .toLowerCase();
@@ -41,13 +41,13 @@ export default class LineupExtension extends Extension {
                 return;
             }
 
-            let desiredWidth = this._settings.get_int("indicator-width");
-            let minWidth = this._settings.get_int("min-width");
-            let maxWidth = this._settings.get_int("max-width");
-            let actorWidth = actor.get_width();
+            const desiredWidth = this._settings.get_int("indicator-width");
+            const minWidth = this._settings.get_int("min-width");
+            const maxWidth = this._settings.get_int("max-width");
+            const actorWidth = actor.get_width();
 
             if (actorWidth >= minWidth && actorWidth <= maxWidth) {
-                let realActor = actor.get_first_child();
+                const realActor = actor.get_first_child();
                 // workaround to fix shrinking of some icons when downsizing e.g. espresso, drive-menu ...
                 if (
                     realActor
@@ -78,9 +78,8 @@ export default class LineupExtension extends Extension {
 
     enable() {
         this._settings = this.getSettings();
-
-        let delaySec = this._settings.get_int("delay-sec") * 1000;
-        let timeoutId = setTimeout(() => {
+        const delaySec = this._settings.get_int("delay-sec") * 1000;
+        const timeoutId = setTimeout(() => {
             this._processAllActors();
             this._actorsAddId = Main.panel._rightBox.connect(
                 "actor-added",
