@@ -2,7 +2,7 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.lineup" path="/org/gnome/shell/extensions/lineup/">
     <key name="indicator-width" type="i">
-      <default>50</default>
+      <default>51</default>
     </key>
     <key name="min-width" type="i">
       <default>40</default>

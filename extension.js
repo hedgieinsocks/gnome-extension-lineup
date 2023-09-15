@@ -1,16 +1,13 @@
-'use strict';
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
+import Clutter from "gi://Clutter";
 
-const Main = imports.ui.main;
-const Clutter = imports.gi.Clutter;
-const ExtensionUtils = imports.misc.extensionUtils;
+const QUICK_SETTINGS_NAME = "system";
+const PLACEHOLDER_NAME = "unlikely-placeholder-name";
 
-
-const QUICK_SETTINGS_NAME = 'system';
-const PLACEHOLDER_NAME = 'unlikely-placeholder-name';
-
-
-class Extension {
-    constructor() {
+export default class LineupExtension extends Extension {
+    constructor(metadata) {
+        super(metadata);
         this._settings = null;
         this._actors = null;
         this._actorsAddId = null;
@@ -18,65 +15,85 @@ class Extension {
         this._timeoutId = [];
     }
 
-
     _processActor(actor, sec) {
-        let delaySec = sec || this._settings.get_int('delay-sec') * 1000;
-        let timeoutId = setTimeout(() => {
-            let excludedWords = this._settings.get_string('exclude-words').toLowerCase() || QUICK_SETTINGS_NAME;
-            let actorName = actor.get_first_child().get_accessible_name().toLowerCase() || PLACEHOLDER_NAME;
-            let actorObjectName = actor.get_first_child().toString().toLowerCase();
+        const delaySec = sec || this._settings.get_int("delay-sec") * 1000;
+        const timeoutId = setTimeout(() => {
+            const excludedWords =
+                this._settings.get_string("exclude-words").toLowerCase() ||
+                QUICK_SETTINGS_NAME;
+            const actorName =
+                actor.get_first_child().get_accessible_name().toLowerCase() ||
+                PLACEHOLDER_NAME;
+            const actorObjectName = actor
+                .get_first_child()
+                .toString()
+                .toLowerCase();
 
             if (
                 actorName === QUICK_SETTINGS_NAME ||
-                excludedWords.split(/\s+/).some(word => actorName.includes(word)) ||
-                excludedWords.split(/\s+/).some(word => actorObjectName.includes(word))
+                excludedWords
+                    .split(/\s+/)
+                    .some((word) => actorName.includes(word)) ||
+                excludedWords
+                    .split(/\s+/)
+                    .some((word) => actorObjectName.includes(word))
             ) {
                 return;
             }
 
-            let desiredWidth = this._settings.get_int('indicator-width');
-            let minWidth = this._settings.get_int('min-width');
-            let maxWidth = this._settings.get_int('max-width');
-            let actorWidth = actor.get_width();
+            const desiredWidth = this._settings.get_int("indicator-width");
+            const minWidth = this._settings.get_int("min-width");
+            const maxWidth = this._settings.get_int("max-width");
+            const actorWidth = actor.get_width();
 
             if (actorWidth >= minWidth && actorWidth <= maxWidth) {
-                let realActor = actor.get_first_child();
+                const realActor = actor.get_first_child();
                 // workaround to fix shrinking of some icons when downsizing e.g. espresso, drive-menu ...
-                if (realActor.get_first_child().get_style_class_name().includes('system-status-icon')) {
-                    realActor.get_first_child().remove_style_class_name('system-status-icon');
-                    realActor.get_first_child().add_style_class_name('popup-menu-icon');
+                if (
+                    realActor
+                        .get_first_child()
+                        .get_style_class_name()
+                        .includes("system-status-icon")
+                ) {
+                    realActor
+                        .get_first_child()
+                        .remove_style_class_name("system-status-icon");
+                    realActor
+                        .get_first_child()
+                        .add_style_class_name("popup-menu-icon");
                 }
                 realActor.set_width(desiredWidth);
-                realActor.get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
+                realActor
+                    .get_first_child()
+                    .set_x_align(Clutter.ActorAlign.CENTER);
             }
         }, delaySec);
         this._timeoutId.push(timeoutId);
     }
 
-
     _processAllActors() {
         this._actors = Main.panel._rightBox.get_children();
-        this._actors.forEach(actor => this._processActor(actor, 0));
+        this._actors.forEach((actor) => this._processActor(actor, 0));
     }
 
-
     enable() {
-        this._settings = ExtensionUtils.getSettings();
-
-        let delaySec = this._settings.get_int('delay-sec') * 1000;
-        let timeoutId = setTimeout(() => {
+        this._settings = this.getSettings();
+        const delaySec = this._settings.get_int("delay-sec") * 1000;
+        const timeoutId = setTimeout(() => {
             this._processAllActors();
-            this._actorsAddId = Main.panel._rightBox.connect('actor-added', (_, actor) => {
-                this._processActor(actor, null);
-            });
+            this._actorsAddId = Main.panel._rightBox.connect(
+                "actor-added",
+                (_, actor) => {
+                    this._processActor(actor, null);
+                }
+            );
         }, delaySec);
         this._timeoutId.push(timeoutId);
 
-        this._actorsChangeId = this._settings.connect('changed', () => {
+        this._actorsChangeId = this._settings.connect("changed", () => {
             this._processAllActors();
         });
     }
-
 
     disable() {
         Main.panel._rightBox.disconnect(this._actorsAddId);
@@ -89,9 +106,4 @@ class Extension {
         this._timeoutId = [];
         this._actors = null;
     }
-}
-
-
-function init() {
-    return new Extension();
 }
