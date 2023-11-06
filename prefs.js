@@ -113,8 +113,8 @@ export default class LineupPreferences extends ExtensionPreferences {
 
         // Exclude
         const rowExclude = new Adw.ActionRow({
-            title: "Exclude",
-            subtitle: "Skip indicators whose names contain these keywords",
+            title: "Exclude Indicators",
+            subtitle: "Min length for each keyword is 3 letters",
         });
         groupTweak.add(rowExclude);
 
@@ -134,6 +134,30 @@ export default class LineupPreferences extends ExtensionPreferences {
 
         rowExclude.add_suffix(excludeEntry);
         rowExclude.activatable_widget = excludeEntry;
+
+        // Hide
+        const rowHide = new Adw.ActionRow({
+            title: "Hide Indicators",
+            subtitle: "Min length for each keyword is 3 letters",
+        });
+        groupTweak.add(rowHide);
+
+        const hideEntry = new Gtk.Entry({
+            placeholder_text: "keepass",
+            text: settings.get_string("hide-words"),
+            valign: Gtk.Align.CENTER,
+            hexpand: true,
+        });
+
+        settings.bind(
+            "hide-words",
+            hideEntry,
+            "text",
+            Gio.SettingsBindFlags.DEFAULT
+        );
+
+        rowHide.add_suffix(hideEntry);
+        rowHide.activatable_widget = hideEntry;
 
         // Resize Delay
         const rowDelay = new Adw.ActionRow({

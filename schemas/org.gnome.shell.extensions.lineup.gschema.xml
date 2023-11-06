@@ -13,6 +13,9 @@
     <key name="exclude-words" type="s">
       <default>""</default>
     </key>
+    <key name="hide-words" type="s">
+      <default>""</default>
+    </key>
     <key name="delay-sec" type="i">
       <default>1</default>
     </key>

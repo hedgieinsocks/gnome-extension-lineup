@@ -4,6 +4,7 @@ import Clutter from "gi://Clutter";
 
 const QUICK_SETTINGS_NAME = "system";
 const PLACEHOLDER_NAME = "unlikely-placeholder-name";
+const MIN_LENGTH = 3;
 
 export default class LineupExtension extends Extension {
     constructor(metadata) {
@@ -20,7 +21,10 @@ export default class LineupExtension extends Extension {
         const timeoutId = setTimeout(() => {
             const excludedWords =
                 this._settings.get_string("exclude-words").toLowerCase() ||
-                QUICK_SETTINGS_NAME;
+                PLACEHOLDER_NAME;
+            const hiddenWords =
+                this._settings.get_string("hide-words").toLowerCase() ||
+                PLACEHOLDER_NAME;
             const actorName =
                 actor.get_first_child().get_accessible_name().toLowerCase() ||
                 PLACEHOLDER_NAME;
@@ -33,11 +37,23 @@ export default class LineupExtension extends Extension {
                 actorName === QUICK_SETTINGS_NAME ||
                 excludedWords
                     .split(/\s+/)
-                    .some((word) => actorName.includes(word)) ||
+                    .some((word) => word.length >= MIN_LENGTH && actorName.includes(word)) ||
                 excludedWords
                     .split(/\s+/)
-                    .some((word) => actorObjectName.includes(word))
+                    .some((word) => word.length >= MIN_LENGTH && actorObjectName.includes(word))
             ) {
+                return;
+            }
+
+            if (
+                hiddenWords
+                    .split(/\s+/)
+                    .some((word) => word.length >= MIN_LENGTH && actorName.includes(word)) ||
+                hiddenWords
+                    .split(/\s+/)
+                    .some((word) => word.length >= MIN_LENGTH && actorObjectName.includes(word))
+            ) {
+                actor.hide();
                 return;
             }
 
