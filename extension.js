@@ -13,78 +13,52 @@ export default class LineupExtension extends Extension {
         this._actors = null;
         this._actorsAddId = null;
         this._actorsChangeId = null;
-        this._timeoutId = [];
+        this._timeoutIds = [];
     }
 
     _processActor(actor, sec) {
         const delaySec = sec || this._settings.get_int("delay-sec") * 1000;
+        const excludeWords = this._settings.get_string("exclude-words").toLowerCase() || PLACEHOLDER_NAME;
+        const hideWords = this._settings.get_string("hide-words").toLowerCase() || PLACEHOLDER_NAME;
+
+        const actorName = actor.get_first_child().get_accessible_name().toLowerCase() || PLACEHOLDER_NAME;
+        const actorObjectName = actor.get_first_child().toString().toLowerCase();
+
+        if (
+            actorName === QUICK_SETTINGS_NAME ||
+            excludeWords.split(/\s+/).some((word) => word.length >= MIN_LENGTH && actorName.includes(word)) ||
+            excludeWords.split(/\s+/).some((word) => word.length >= MIN_LENGTH && actorObjectName.includes(word))
+        ) {
+            return;
+        }
+
+        if (
+            hideWords.split(/\s+/).some((word) => word.length >= MIN_LENGTH && actorName.includes(word)) ||
+            hideWords.split(/\s+/).some((word) => word.length >= MIN_LENGTH && actorObjectName.includes(word))
+        ) {
+            actor.hide();
+            return;
+        }
+
+        const desiredWidth = this._settings.get_int("indicator-width");
+        const minWidth = this._settings.get_int("min-width");
+        const maxWidth = this._settings.get_int("max-width");
+        const actorWidth = actor.get_width();
+
+        if (actorWidth < minWidth || actorWidth > maxWidth) {
+            return;
+        }
+
         const timeoutId = setTimeout(() => {
-            const excludedWords =
-                this._settings.get_string("exclude-words").toLowerCase() ||
-                PLACEHOLDER_NAME;
-            const hiddenWords =
-                this._settings.get_string("hide-words").toLowerCase() ||
-                PLACEHOLDER_NAME;
-            const actorName =
-                actor.get_first_child().get_accessible_name().toLowerCase() ||
-                PLACEHOLDER_NAME;
-            const actorObjectName = actor
-                .get_first_child()
-                .toString()
-                .toLowerCase();
-
-            if (
-                actorName === QUICK_SETTINGS_NAME ||
-                excludedWords
-                    .split(/\s+/)
-                    .some((word) => word.length >= MIN_LENGTH && actorName.includes(word)) ||
-                excludedWords
-                    .split(/\s+/)
-                    .some((word) => word.length >= MIN_LENGTH && actorObjectName.includes(word))
-            ) {
-                return;
+            const realActor = actor.get_first_child();
+            if (realActor.get_first_child().get_style_class_name().includes("system-status-icon")) {
+                realActor.get_first_child().remove_style_class_name("system-status-icon");
+                realActor.get_first_child().add_style_class_name("popup-menu-icon");
             }
-
-            if (
-                hiddenWords
-                    .split(/\s+/)
-                    .some((word) => word.length >= MIN_LENGTH && actorName.includes(word)) ||
-                hiddenWords
-                    .split(/\s+/)
-                    .some((word) => word.length >= MIN_LENGTH && actorObjectName.includes(word))
-            ) {
-                actor.hide();
-                return;
-            }
-
-            const desiredWidth = this._settings.get_int("indicator-width");
-            const minWidth = this._settings.get_int("min-width");
-            const maxWidth = this._settings.get_int("max-width");
-            const actorWidth = actor.get_width();
-
-            if (actorWidth >= minWidth && actorWidth <= maxWidth) {
-                const realActor = actor.get_first_child();
-                // workaround to fix shrinking of some icons when downsizing e.g. espresso, drive-menu ...
-                if (
-                    realActor
-                        .get_first_child()
-                        .get_style_class_name()
-                        .includes("system-status-icon")
-                ) {
-                    realActor
-                        .get_first_child()
-                        .remove_style_class_name("system-status-icon");
-                    realActor
-                        .get_first_child()
-                        .add_style_class_name("popup-menu-icon");
-                }
-                realActor.set_width(desiredWidth);
-                realActor
-                    .get_first_child()
-                    .set_x_align(Clutter.ActorAlign.CENTER);
-            }
+            realActor.set_width(desiredWidth);
+            realActor.get_first_child().set_x_align(Clutter.ActorAlign.CENTER);
         }, delaySec);
-        this._timeoutId.push(timeoutId);
+        this._timeoutIds.push(timeoutId);
     }
 
     _processAllActors() {
@@ -95,16 +69,14 @@ export default class LineupExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
         const delaySec = this._settings.get_int("delay-sec") * 1000;
+
         const timeoutId = setTimeout(() => {
             this._processAllActors();
-            this._actorsAddId = Main.panel._rightBox.connect(
-                "actor-added",
-                (_, actor) => {
-                    this._processActor(actor, null);
-                }
-            );
+            this._actorsAddId = Main.panel._rightBox.connect("actor-added", (_, actor) => {
+                this._processActor(actor, null);
+            });
         }, delaySec);
-        this._timeoutId.push(timeoutId);
+        this._timeoutIds.push(timeoutId);
 
         this._actorsChangeId = this._settings.connect("changed", () => {
             this._processAllActors();
@@ -116,10 +88,10 @@ export default class LineupExtension extends Extension {
         this._settings.disconnect(this._actorsChangeId);
         this._actorsAddId = null;
         this._actorsChangeId = null;
-        this._timeoutId.forEach((timeoutId) => {
+        this._timeoutIds.forEach((timeoutId) => {
             clearTimeout(timeoutId);
         });
-        this._timeoutId = [];
+        this._timeoutIds = [];
         this._actors = null;
     }
 }

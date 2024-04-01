@@ -162,8 +162,7 @@ export default class LineupPreferences extends ExtensionPreferences {
         // Resize Delay
         const rowDelay = new Adw.ActionRow({
             title: "Delay",
-            subtitle:
-                "Increase if some indicators glitch or refuse to follow the rules",
+            subtitle: "Increase if some indicators glitch or refuse to follow the rules",
         });
         groupTweak.add(rowDelay);
 
