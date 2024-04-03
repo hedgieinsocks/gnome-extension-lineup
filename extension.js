@@ -1,5 +1,6 @@
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 import Clutter from "gi://Clutter";
 
 const QUICK_SETTINGS_NAME = "system";
@@ -72,7 +73,9 @@ export default class LineupExtension extends Extension {
 
         const timeoutId = setTimeout(() => {
             this._processAllActors();
-            this._actorsAddId = Main.panel._rightBox.connect("actor-added", (_, actor) => {
+            const shellVersion = parseFloat(Config.PACKAGE_VERSION).toString().slice(0, 2);
+            const signal = (shellVersion == 45) ? "actor-added" : "child-added";
+            this._actorsAddId = Main.panel._rightBox.connect(signal, (_, actor) => {
                 this._processActor(actor, null);
             });
         }, delaySec);
