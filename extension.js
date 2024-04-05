@@ -88,6 +88,7 @@ export default class LineupExtension extends Extension {
     disable() {
         Main.panel._rightBox.disconnect(this._actorsAddId);
         this._settings.disconnect(this._actorsChangeId);
+        this._settings = null;
         this._actorsAddId = null;
         this._actorsChangeId = null;
         this._timeoutIds.forEach((timeoutId) => {
