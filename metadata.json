@@ -2,7 +2,7 @@
   "uuid": "lineup@hedgie.tech",
   "name": "Lineup",
   "description": "Set width for right-side panel indicators",
-  "shell-version": ["45", "46", "47"],
+  "shell-version": ["45", "46", "47", "48"],
   "settings-schema": "org.gnome.shell.extensions.lineup",
   "url": "https://github.com/hedgieinsocks/gnome-extension-lineup"
 }
